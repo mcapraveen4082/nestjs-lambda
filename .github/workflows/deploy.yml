@@ -22,10 +22,10 @@ jobs:
           node-version: '18'
 
       - name: Install Dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm install --frozen-lockfile
 
       - name: Build Project
-        run: pnpm run build
+        run: npm run build
 
       - name: Prepare Deployment Package
         run: |
