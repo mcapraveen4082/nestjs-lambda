@@ -44,7 +44,7 @@ jobs:
         run: |
           aws lambda update-function-configuration \
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
-            --handler main.handler \
+            --handler lambda.handler \
             --runtime nodejs18.x \
             --region ${{ secrets.AWS_REGION }}
 
