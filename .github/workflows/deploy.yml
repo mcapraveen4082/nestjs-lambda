@@ -43,6 +43,10 @@ jobs:
             --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
             --zip-file fileb://function.zip
 
+    # Wait a few seconds for Lambda to finish updating
+      - name: Wait for Lambda to finish
+        run: sleep 5
+
       - name: Publish Lambda Version
         id: publish
         run: |
