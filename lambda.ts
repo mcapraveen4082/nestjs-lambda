@@ -14,8 +14,8 @@ async function bootstrap() {
   // Change `.start()` to the actual method your service exposes (e.g., .run()).
   try {
     const taskService = app.get(TaskService);
-    if (taskService && typeof taskService.start === 'function') {
-      await taskService.start();
+    if (taskService && typeof taskService.runTask === 'function') {
+      await taskService.runTask();
     }
   } catch (err) {
     // If TaskService isn't registered or path/method differs, remove or adjust this block.
