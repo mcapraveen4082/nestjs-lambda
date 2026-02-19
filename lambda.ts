@@ -1,16 +1,23 @@
-/* eslint-disable */
-import { Handler } from 'aws-lambda';
+import { Handler, Context, Callback } from 'aws-lambda';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './src/app.module';
 import serverlessExpress from '@vendia/serverless-express';
 
-let cachedHandler: Handler;
+let server: Handler;
 
-export const handler: Handler = async (event, context, callback) => {
-  if (!cachedHandler) {
-    const app = await NestFactory.create(AppModule);
-    await app.init();
-    cachedHandler = serverlessExpress({ app });
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.init();
+  return serverlessExpress({ app: app.getHttpAdapter().getInstance() });
+}
+
+export const handler: Handler = async (
+  event: any,
+  context: Context,
+  callback: Callback,
+) => {
+  if (!server) {
+    server = await bootstrap();
   }
-  return cachedHandler(event, context, callback);
+  return server(event, context, callback);
 };
