@@ -2,7 +2,7 @@ import { Handler, Context, Callback } from 'aws-lambda';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './src/app.module';
 import serverlessExpress from '@vendia/serverless-express';
-import { TaskService } from './src/task/task.service'; // <- update path if your service lives elsewhere
+import { TaskService } from './src/task.service';
 
 let server: Handler;
 
