@@ -9,4 +9,8 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+  @Get('task')
+  getTask(): string {
+    return this.appService.getTask();
+  }
 }
