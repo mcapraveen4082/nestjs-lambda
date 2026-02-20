@@ -1,0 +1,77 @@
+name: Deploy Lambda Production
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - closed
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm install --frozen-lockfile
+
+      - name: Build Project
+        run: npm run build
+
+      - name: Prepare Deployment Package
+        run: |
+          cp -r node_modules dist/
+          cd dist
+          zip -r ../function.zip .
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Set Lambda Handler and Runtime
+        run: |
+          aws lambda update-function-configuration \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --handler lambda.handler \
+            --runtime nodejs18.x \
+            --region ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to Lambda
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --zip-file fileb://function.zip
+
+      - name: Wait for Lambda to finish
+        run: sleep 5
+
+      - name: Publish Lambda Version
+        id: publish
+        run: |
+          VERSION=$(aws lambda publish-version \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --query 'Version' --output text)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Update Production Alias
+        run: |
+          aws lambda update-alias \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --name production \
+            --function-version $VERSION || \
+          aws lambda create-alias \
+            --function-name ${{ secrets.LAMBDA_FUNCTION_NAME }} \
+            --name production \
+            --function-version $VERSION
