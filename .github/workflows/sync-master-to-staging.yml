@@ -1,6 +1,6 @@
 name: 'Sync Master to Staging'
 
-On:
+on:
   push:
     branches:
       - master
