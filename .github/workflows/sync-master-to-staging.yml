@@ -1,0 +1,25 @@
+name: 'Sync Master to Staging'
+
+On:
+  push:
+    branches:
+      - master
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      - name: Sync to Staging
+        run: |
+          git config user.name "mcapraveen4082"
+          git config user.email "mca.praveen4082@gmail.com"
+          git fetch origin staging
+          git checkout staging
+          git merge origin/master
+          git push origin staging
